@@ -12,17 +12,30 @@ pipeline {
         sh 'mvn clean install'
       }
     }
-    stage('Publish jUnit tests') {
-      steps {
-        junit(allowEmptyResults: true, testResults: env.jUnitPattern)
-      }
-    }
     stage('Upload to Nexus') {
       steps {
         echo 'Loading to Nexus'
       }
     }
   }
+  
+  post {
+      always {
+      	echo 'Publishing jUnit test results'
+        junit(allowEmptyResults: true, testResults: env.jUnitPattern)
+      	echo 'Publishing jBehave test results'
+        junit(allowEmptyResults: true, testResults: env.jUnitPattern)
+        publishHTML target:[
+			allowMissing: true, 
+			alwaysLinkToLastBuild: false, 
+			keepAll: true, 
+			reportDir: env.jBehaveReportDir, 
+			reportFiles: env.jBehaveReportFiles, 
+			reportName: env.jBehaveReportName, 
+			reportTitles: '']
+      }
+  }
+  
   environment {
     gitUrl = 'https://coenie.basson@git.telrock-labs.com/telrock-spring/telrock-tas.git'
     buildBranch = 'rc/5.35.17-SNAPSHOT'
