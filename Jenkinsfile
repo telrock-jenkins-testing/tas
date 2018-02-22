@@ -17,25 +17,12 @@ pipeline {
         echo 'Loading to Nexus'
       }
     }
-  }
-  
-  post {
-      always {
-      	echo 'Publishing jUnit test results'
-        junit(allowEmptyResults: true, testResults: env.jUnitPattern)
-      	echo 'Publishing jBehave test results'
-        junit(allowEmptyResults: true, testResults: env.jUnitPattern)
-        publishHTML target:[
-			allowMissing: true, 
-			alwaysLinkToLastBuild: false, 
-			keepAll: true, 
-			reportDir: env.jBehaveReportDir, 
-			reportFiles: env.jBehaveReportFiles, 
-			reportName: env.jBehaveReportName, 
-			reportTitles: '']
+    stage('deploy') {
+      steps {
+        input 'Would you like to continue?'
       }
+    }
   }
-  
   environment {
     gitUrl = 'https://coenie.basson@git.telrock-labs.com/telrock-spring/telrock-tas.git'
     buildBranch = 'rc/5.35.17-SNAPSHOT'
@@ -44,4 +31,22 @@ pipeline {
     jBehaveReportFiles = 'reports.html'
     jBehaveReportName = 'JBehave - Karma'
   }
-}
+  post {
+    always {
+      echo 'Publishing jUnit test results'
+      junit(allowEmptyResults: true, testResults: env.jUnitPattern)
+      echo 'Publishing jBehave test results'
+      junit(allowEmptyResults: true, testResults: env.jUnitPattern)
+      publishHTML([
+        			allowMissing: true, 
+        			alwaysLinkToLastBuild: false, 
+        			keepAll: true, 
+        			reportDir: env.jBehaveReportDir, 
+        			reportFiles: env.jBehaveReportFiles, 
+        			reportName: env.jBehaveReportName, 
+        			reportTitles: ''])
+        
+      }
+      
+    }
+  }
