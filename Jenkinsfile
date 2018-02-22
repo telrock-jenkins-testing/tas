@@ -2,9 +2,18 @@ pipeline {
   agent any
   stages {
     stage('Checkout') {
-      steps {
-        echo "Checking out ${env.gitUrl} ${env.buildBranch}"
-        git(url: env.gitUrl, branch: env.buildBranch, credentialsId: 'eaf1e289-5cdf-4aa5-8490-041fc3a27097')
+      parallel {
+        stage('Checkout') {
+          steps {
+            echo "Checking out ${env.gitUrl} ${env.buildBranch}"
+            git(url: env.gitUrl, branch: env.buildBranch, credentialsId: 'eaf1e289-5cdf-4aa5-8490-041fc3a27097')
+          }
+        }
+        stage('config') {
+          steps {
+            build 'config'
+          }
+        }
       }
     }
     stage('Build') {
@@ -15,11 +24,6 @@ pipeline {
     stage('Upload to Nexus') {
       steps {
         echo 'Loading to Nexus'
-      }
-    }
-    stage('config') {
-      steps {
-        build 'config'
       }
     }
   }
